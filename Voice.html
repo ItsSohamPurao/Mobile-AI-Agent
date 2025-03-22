@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Speech Recognition</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery for AJAX -->
+</head>
+<body>
+    <button id="start" onclick="startRecognition()">Start Recognition</button>
+    <button id="end" onclick="stopRecognition()">Stop Recognition</button>
+    <p id="output"></p>
+    <p id="answer"></p> <!-- New element to display the answer -->
+    <script>
+        const output = document.getElementById('output');
+        const answerElement = document.getElementById('answer'); // Reference to the answer element
+        let recognition;
+
+        function startRecognition() {
+            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'hi';
+            recognition.continuous = true;
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                output.textContent += transcript;
+
+                // Send the recognized text to the backend using AJAX
+                $.ajax({
+                    url: "/process_query", // Backend endpoint
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ query: transcript }),
+                    success: function(response) {
+                        // Display the answer in the answer element
+                        answerElement.textContent = response.answer;
+                    },
+                    error: function(error) {
+                        console.error("Error:", error);
+                    }
+                });
+            };
+
+            recognition.onend = function() {
+                recognition.start();
+            };
+            recognition.start();
+        }
+
+        function stopRecognition() {
+            recognition.stop();
+            output.innerHTML = "";
+        }
+    </script>
+</body>
+</html>

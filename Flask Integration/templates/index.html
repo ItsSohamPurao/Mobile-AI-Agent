@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Command</title>
+</head>
+<body>
+    <h1>Speak a Command</h1>
+    <button id="start-recording">🎙️ Start Listening</button>
+    <p id="status">Press the button and speak</p>
+    
+    <script>
+        const button = document.getElementById("start-recording");
+        const statusText = document.getElementById("status");
+
+        // Check if Speech Recognition API is available
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Your browser does not support speech recognition.");
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        // When speech is recognized
+        recognition.onresult = function(event) {
+            let command = event.results[0][0].transcript;
+            statusText.innerText = "You said: " + command;
+            sendVoiceCommand(command);
+        };
+
+        // Handle errors
+        recognition.onerror = function(event) {
+            statusText.innerText = "Error: " + event.error;
+        };
+
+        // Start voice recognition when button is clicked
+        button.addEventListener("click", () => {
+            statusText.innerText = "Listening...";
+            recognition.start();
+        });
+
+        function sendVoiceCommand(command) {
+            fetch("/api/process_voice", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                statusText.innerText = "Response: " + data.result;
+            })
+            .catch(error => {
+                statusText.innerText = "Error sending command!";
+                console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>
