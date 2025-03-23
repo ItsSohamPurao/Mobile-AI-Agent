@@ -42,4 +42,4 @@ Imagine **Google Assistant, but way smarter, more customizable, and under *your*
 ---
 
 ## Working prototype 
-[Demo video](Mobile_Ai_Agent (1).mp4)
+[Demo video](Mobile_Ai_Agent.mp4)
